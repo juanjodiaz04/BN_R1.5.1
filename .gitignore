@@ -7,3 +7,7 @@ __pycache__/
 # train
 audios/
 embeddings/
+
+# csv _embeddings
+embeddings_csv/
+*.csv
