@@ -1,5 +1,6 @@
-# Entorno virtual
+# Virtual Environment
 R1.5.1/
+Class-env/
 .env/
 *.pyc
 __pycache__/
