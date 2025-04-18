@@ -1,0 +1,11 @@
+torch==2.2.2+cu118
+torchvision==0.17.2+cu118
+torchaudio==2.2.2+cu118
+-f https://download.pytorch.org/whl/torch_stable.html
+
+pandas
+numpy==1.23.5
+matplotlib
+scikit-learn
+ipykernel
+jupyter
