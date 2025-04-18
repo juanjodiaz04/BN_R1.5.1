@@ -3,3 +3,7 @@ R1.5.1/
 .env/
 *.pyc
 __pycache__/
+
+# train
+audios/
+embeddings/
