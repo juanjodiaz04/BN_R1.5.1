@@ -62,7 +62,7 @@ class CNNClassifier(nn.Module):
 # Carga y preparacion de datos
 # ===============================
 def cargar_datos(path_csv):
-    df = pd.read_csv(path_csv)
+    df = pd.read_csv(path_csv, dtype={"label": str})
     X = df[[f'emb_{i}' for i in range(1024)]].values.astype(np.float32)
     y = df["label"].values
     
