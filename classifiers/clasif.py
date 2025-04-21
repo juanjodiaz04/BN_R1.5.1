@@ -17,9 +17,9 @@ from sklearn.metrics import classification_report, confusion_matrix, ConfusionMa
 # ===============================
 # Configuracion y utilidades
 # ===============================
-def configurar_logs(output_dir):
+def configurar_logs(output_dir, timestamp=datetime.datetime.now().strftime("%d_%H%M")):
     os.makedirs(output_dir, exist_ok=True)
-    log_file = os.path.join(output_dir, f'log_{datetime.datetime.now().strftime("%d_%H%M")}.txt')
+    log_file = os.path.join(output_dir, f'log_{timestamp}.txt')
     def log(msg):
         print(msg)
         with open(log_file, "a") as f:
@@ -111,7 +111,7 @@ def entrenar_modelo(model, train_dl, device, log, epochs=20):
 # ===============================
 # Evaluacion
 # ===============================
-def evaluar_modelo(model, val_dl, le, device, output_dir, log):
+def evaluar_modelo(model, val_dl, le, device, output_dir, log, timestamp=datetime.datetime.now().strftime("%d_%H%M")):
     model.eval()
     y_true, y_pred = [], []
 
@@ -138,7 +138,6 @@ def evaluar_modelo(model, val_dl, le, device, output_dir, log):
     plt.grid(False)
 
     # Marca temporal para el archivo
-    timestamp = datetime.datetime.now().strftime("%d_%H%M")
     cm_path = os.path.join(output_dir, f"confusion_matrix_{timestamp}.png")
 
     plt.savefig(cm_path)
