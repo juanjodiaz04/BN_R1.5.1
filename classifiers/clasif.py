@@ -155,7 +155,10 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", type=int, default=20, help="Numero de epocas de entrenamiento")
     args = parser.parse_args()
 
-    log, log_file = configurar_logs(args.output)
+    # Timestamp para archivos
+    timestamp = datetime.datetime.now().strftime("%d_%H%M")
+
+    log, log_file = configurar_logs(args.output, timestamp=timestamp)
 
     log_hardware(log)
 
@@ -167,11 +170,16 @@ if __name__ == "__main__":
     model = CNNClassifier(num_classes).to(device)
 
     entrenar_modelo(model, train_dl, device, log, epochs=args.epochs)
-    evaluar_modelo(model, val_dl, le, device, args.output, log)
+    evaluar_modelo(model, val_dl, le, device, args.output, log, timestamp=timestamp)
+
+    # ===============================
+    # Guardar modelo entrenado
+    # ===============================
+    model_path = os.path.join(args.output, f"modelo_{timestamp}.pt")
+    torch.save(model.state_dict(), model_path)
+    log(f"\nModelo guardado en '{model_path}'")
 
 ## Ejemplo
 
 #cd ~ BN_R1.5.1
-
-# python Clasif.py --csv embeddings_csv/all_embeddings.csv --output outputs --epochs 20
 # python classifiers/Clasif.py --csv embeddings_csv/embeddings_MT_overlap.csv --output outputs --epochs 20
