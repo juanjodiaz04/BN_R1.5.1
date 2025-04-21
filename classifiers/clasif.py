@@ -136,7 +136,11 @@ def evaluar_modelo(model, val_dl, le, device, output_dir, log):
     disp.plot(cmap="Blues", ax=ax, xticks_rotation='vertical')
     plt.title("Matriz de Confusion")
     plt.grid(False)
-    cm_path = os.path.join(output_dir, "confusion_matrix.png")
+
+    # Marca temporal para el archivo
+    timestamp = datetime.datetime.now().strftime("%d_%H%M")
+    cm_path = os.path.join(output_dir, f"confusion_matrix_{timestamp}.png")
+
     plt.savefig(cm_path)
     plt.close()
     log(f"\nMatriz de confusion guardada como '{cm_path}'.")
@@ -167,5 +171,8 @@ if __name__ == "__main__":
     evaluar_modelo(model, val_dl, le, device, args.output, log)
 
 ## Ejemplo
+
+#cd ~ BN_R1.5.1
+
 # python Clasif.py --csv embeddings_csv/all_embeddings.csv --output outputs --epochs 20
-# python Clasif.py --csv embeddings_csv/embeddings_3chunks_MT.csv --output outputs --epochs 20
+# python classifiers/Clasif.py --csv embeddings_csv/embeddings_MT_overlap.csv --output outputs --epochs 20

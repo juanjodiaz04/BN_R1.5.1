@@ -65,3 +65,8 @@ columns = ["ID", "label"] + [f"emb_{i}" for i in range(3072)]
 df = pd.DataFrame(rows, columns=columns)
 df.to_csv(OUTPUT_CSV, index=False, float_format="%.8f")
 print(f"CSV guardado como {OUTPUT_CSV}")
+
+#ejemplo
+
+# cd ~BN_R1.5.1
+#python embed2csv/csv_MT_overlap.py

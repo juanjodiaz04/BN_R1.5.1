@@ -6,42 +6,36 @@ import time
 
 # -------------------- CONFIGURACIÓN --------------------
 EMBEDDINGS_ROOT = "embeddings"
-OUTPUT_CSV = "embeddings_csv/embeddings_3chunks_MT.csv"
+OUTPUT_CSV = "embeddings_csv/embeddings_MT_overlap.csv"
 
-# Control de hilos
-MAX_THREADS = 4  # Cambia esto entre 1 y 5
-MAX_THREADS = min(MAX_THREADS, 5, os.cpu_count())
+MAX_THREADS = min(4, 5, os.cpu_count())
 # -------------------------------------------------------
 
 def load_embedding(path):
-    """Lee el embedding como texto, conservando el formato decimal exacto."""
     with open(path, "r") as f:
         line = f.readline().strip()
         parts = line.split("\t")
         if len(parts) < 3:
             raise ValueError(f"Formato inválido en archivo: {path}")
         emb_str = parts[2]
-        return emb_str.split(",")  # devuelve lista de strings, no floats
+        return emb_str.split(",")  # lista de strings
 
 def parse_filename(path):
-    """Extrae info desde el path completo."""
     file = os.path.basename(path)
     label = os.path.basename(os.path.dirname(path))
     audio_id = file.split(".")[0].rsplit("_", 1)[0]
     chunk_index = int(file.split("_")[1].split(".")[0])
     return label, audio_id, chunk_index
 
-# Recolectar todos los paths
+# Recolectar paths
 all_txt_files = []
 for label_folder in os.listdir(EMBEDDINGS_ROOT):
     folder_path = os.path.join(EMBEDDINGS_ROOT, label_folder)
-    if not os.path.isdir(folder_path):
-        continue
+    if not os.path.isdir(folder_path): continue
     for file in os.listdir(folder_path):
         if file.endswith(".birdnet.embeddings.txt"):
             all_txt_files.append(os.path.join(folder_path, file))
 
-# Diccionario de: { (label, audio_id): [(chunk_index, embedding), ...] }
 audio_chunks = defaultdict(list)
 
 print(f"Cargando archivos en paralelo con {MAX_THREADS} hilos...")
@@ -63,23 +57,23 @@ rows = []
 
 for (label, audio_id), chunks in audio_chunks.items():
     chunks.sort(key=lambda x: x[0])
-    embeddings = [e[1] for e in chunks]  # e[1] es una lista de strings
+    embeddings = [e[1] for e in chunks]
 
     for i in range(len(embeddings)):
         group = embeddings[i:i+3]
         if len(group) < 3:
-            group += [group[-1]] * (3 - len(group))  # padding
+            group += [group[-1]] * (3 - len(group))
 
         if len(group) == 3:
-            concatenated = sum(group, [])  # concatena listas de strings
-            row_id = f"{audio_id}_em{i}"
-            row = [row_id, label] + concatenated  # todo como strings
+            concatenated = sum(group, [])
+            row_id = audio_id
+            group_id = str(i)
+            row = [row_id, group_id, label] + concatenated
             rows.append(row)
 
-# Guardar
-columns = ["ID", "label"] + [f"emb_{i}" for i in range(3072)]
+columns = ["ID", "group", "label"] + [f"emb_{i}" for i in range(3072)]
 df = pd.DataFrame(rows, columns=columns)
-df.to_csv(OUTPUT_CSV, index=False)  # NO usar float_format
+df.to_csv(OUTPUT_CSV, index=False)
 
 elapsed = time.time() - start_time
 print(f"CSV guardado en {OUTPUT_CSV} con {len(rows)} filas.")
