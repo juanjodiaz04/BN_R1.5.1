@@ -47,7 +47,7 @@ class CNNClassifier(nn.Module):
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
         self.pool = nn.MaxPool2d(2)
         self.dropout = nn.Dropout(0.3)
-        self.fc1 = nn.Linear(64 * 8 * 8, 128)
+        self.fc1 = nn.Linear(64 * 8 * 24, 128)  # ← CAMBIO AQUÍ
         self.fc2 = nn.Linear(128, num_classes)
 
     def forward(self, x):
@@ -63,7 +63,7 @@ class CNNClassifier(nn.Module):
 # ===============================
 def cargar_datos(path_csv):
     df = pd.read_csv(path_csv, dtype={"label": str})
-    X = df[[f'emb_{i}' for i in range(1024)]].values.astype(np.float32)
+    X = df[[f'emb_{i}' for i in range(3072)]].values.astype(np.float32)
     y = df["label"].values
     
     le = LabelEncoder()
@@ -74,8 +74,9 @@ def cargar_datos(path_csv):
         X, y_encoded, test_size=0.2, stratify=y_encoded, random_state=42
     )
 
-    X_train = X_train.reshape(-1, 1, 32, 32)
-    X_val = X_val.reshape(-1, 1, 32, 32)
+    # Cambiamos de 32x32 a 32x96 para reflejar los 3072 elementos (1x32x96)
+    X_train = X_train.reshape(-1, 1, 32, 96)
+    X_val = X_val.reshape(-1, 1, 32, 96)
 
     train_ds = TensorDataset(torch.tensor(X_train), torch.tensor(y_train))
     val_ds = TensorDataset(torch.tensor(X_val), torch.tensor(y_val))
@@ -167,3 +168,4 @@ if __name__ == "__main__":
 
 ## Ejemplo
 # python Clasif.py --csv embeddings_csv/all_embeddings.csv --output outputs --epochs 20
+# python Clasif.py --csv embeddings_csv/embeddings_3chunks_MT.csv --output outputs --epochs 20
