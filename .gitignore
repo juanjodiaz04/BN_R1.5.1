@@ -1,6 +1,7 @@
 # Virtual Environment
 R1.5.1/
 Class-env/
+Emb-env/
 .env/
 *.pyc
 __pycache__/
