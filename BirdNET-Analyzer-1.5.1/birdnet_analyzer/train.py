@@ -570,3 +570,6 @@ if __name__ == "__main__":
 
     # Train model
     trainModel()
+
+#ejemplo
+#python -m birdnet_analyzer.train --i ../audios/ --o ../custom_model/ --threads 4 --epochs 20

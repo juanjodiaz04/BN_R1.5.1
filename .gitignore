@@ -14,5 +14,6 @@ embeddings/
 embeddings_csv/
 *.csv
 
-# jupyter Notebook
+# Outpus
 outputs/
+custom_model/
