@@ -95,4 +95,4 @@ if __name__ == "__main__":
 
 #ejemplo
 # cd ~BN_R1.5.1
-# python embed2csv/embed_MT_P_NOV.py --input embeddings --output embeddings_csv/embeddings_MT_overlap.csv --chunks 3 --threads 4
+# python embed2csv/embed_MT_P_NOV.py --input embeddings --output embeddings_csv/embeddings_MT_noverlap.csv --chunks 3 --threads 4
