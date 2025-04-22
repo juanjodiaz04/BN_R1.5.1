@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, TensorDataset
+import joblib
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
@@ -176,10 +177,13 @@ if __name__ == "__main__":
     # Guardar modelo entrenado
     # ===============================
     model_path = os.path.join(args.output, f"modelo_{timestamp}.pt")
+    encoder_path = os.path.join(args.output, f"label_encoder_{timestamp}.pkl")
     torch.save(model.state_dict(), model_path)
+    joblib.dump(le, encoder_path)
     log(f"\nModelo guardado en '{model_path}'")
+    log(f"Label encoder guardado en '{encoder_path}'")
 
 ## Ejemplo
 
 #cd ~ BN_R1.5.1
-# python classifiers/Clasif.py --csv embeddings_csv/embeddings_MT_overlap.csv --output outputs --epochs 20
+# python classifiers/clasif.py --csv embeddings_csv/embeddings_MT_overlap.csv --output outputs --epochs 20
