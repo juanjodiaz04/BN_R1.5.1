@@ -81,4 +81,4 @@ if __name__ == "__main__":
 
 # ejemplo
 
-# python inference.py --csv embeddings_csv/embeddings_MT_overlap.csv--modelo outputs/modelo_22_1530.pt --labels outputs/label_encoder.pkl --output resultados_inferencia.csv
+# python inference.py --csv embeddings_csv/embeddings_MT_overlap.csv--modelo outputs/modelo_22_1530.pt --labels outputs/label_encoder.pkl --output sample_submission.csv
