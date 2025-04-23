@@ -1,78 +1,63 @@
 import os
 import argparse
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import pandas as pd
 import numpy as np
 import joblib
 from tqdm import tqdm
+from model import CNNClassifier
 
 # ===============================
-# Definición del modelo CNN original
-# ===============================
-class CNNClassifier(nn.Module):
-    def __init__(self, num_classes):
-        super().__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.pool = nn.MaxPool2d(2)
-        self.dropout = nn.Dropout(0.3)
-        self.fc1 = nn.Linear(64 * 8 * 24, 128)  # input: (1, 32, 96)
-        self.fc2 = nn.Linear(128, num_classes)
-
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(x.size(0), -1)
-        x = self.dropout(F.relu(self.fc1(x)))
-        return self.fc2(x)
-
-# ===============================
-# Script principal
+# Script principal con soporte para pesos
 # ===============================
 def main():
     parser = argparse.ArgumentParser(description="Inferencia con CNN y embeddings BirdNET")
     parser.add_argument("--csv", type=str, required=True, help="Ruta al archivo CSV con los embeddings")
-    parser.add_argument("--modelo", type=str, required=True, help="Ruta al archivo del modelo (.pt)")
+    parser.add_argument("--modelo", type=str, required=True, help="Ruta al modelo completo (.pt) o solo los pesos")
     parser.add_argument("--labels", type=str, required=True, help="Ruta al archivo LabelEncoder (.pkl)")
     parser.add_argument("--output", type=str, default="predicciones.csv", help="Archivo de salida")
+    parser.add_argument("--solo-pesos", action="store_true", help="Usar solo state_dict en lugar del modelo completo")
     args = parser.parse_args()
 
     # ===============================
     # Cargar LabelEncoder
     # ===============================
+    print("🔤 Cargando codificador de etiquetas...")
     le = joblib.load(args.labels)
-    print(le.classes_)
-    print(f"Clases: {len(le.classes_)}")
+    print(f"Clases cargadas: {le.classes_}")
     num_classes = len(le.classes_)
 
     # ===============================
-    # Cargar modelo entrenado
+    # Cargar modelo
     # ===============================
-    model = CNNClassifier(num_classes=num_classes)
-    model.load_state_dict(torch.load(args.modelo, map_location=torch.device("cpu")))
+    print("📦 Cargando modelo...")
+    if args.solo_pesos:
+        model = CNNClassifier(num_classes=num_classes)
+        state_dict = torch.load(args.modelo, map_location=torch.device("cpu"))
+        model.load_state_dict(state_dict)
+    else:
+        model = torch.load(args.modelo, map_location=torch.device("cpu"))
+
     model.eval()
 
     # ===============================
-    # Cargar embeddings
+    # Cargar CSV de embeddings
     # ===============================
+    print("📊 Cargando CSV...")
     df = pd.read_csv(args.csv)
-    embedding_cols = [col for col in df.columns if col.startswith("em_")]
+    embedding_cols = [col for col in df.columns if col.startswith("emb_")]
     X = df[embedding_cols].values.astype(np.float32)
-
-    # CNN espera entrada (1, 32, 96)
-    X = X.reshape(-1, 1, 32, 96)
 
     # ===============================
     # Inferencia
     # ===============================
-    pred_indices = []
-    pred_clases = []
+    print("🤖 Realizando inferencia...")
+    X = X.reshape(-1, 1, 32, 96)
+    pred_indices, pred_clases = [], []
 
     with torch.no_grad():
         for emb in tqdm(X, desc="Inferencia"):
-            input_tensor = torch.tensor(emb).unsqueeze(0)  # shape: (1, 1, 32, 96)
+            input_tensor = torch.tensor(emb).unsqueeze(0)  # (1, 1, 32, 96)
             output = model(input_tensor)
             pred = torch.argmax(output, dim=1).item()
             clase = le.inverse_transform([pred])[0]
@@ -81,7 +66,7 @@ def main():
             pred_clases.append(clase)
 
     # ===============================
-    # Guardar predicciones
+    # Guardar resultados
     # ===============================
     df["target"] = pred_indices
     df["clase"] = pred_clases
@@ -90,3 +75,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -74,7 +74,7 @@ def generar_csv_noverlap(input_dir, output_csv, chunk_size=3, num_threads=4):
 
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
     num_features = chunk_size * 1024
-    columns = ["ID", "group", "label"] + [f"emb_{i}" for i in range(num_features)]
+    columns = ["row_id", "group", "label"] + [f"emb_{i}" for i in range(num_features)]
     df = pd.DataFrame(rows, columns=columns, dtype=str)
     df.to_csv(output_csv, index=False)
 
