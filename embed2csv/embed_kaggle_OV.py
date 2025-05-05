@@ -16,8 +16,12 @@ def load_embedding(path):
 
 def parse_filename(path):
     file = os.path.basename(path)
-    audio_id = file.split(".")[0].rsplit("_", 1)[0]
-    chunk_index = int(file.split("_")[1].split(".")[0])
+    name = file.split(".")[0]
+    if "_" not in name:
+        raise ValueError(f"Nombre de archivo no tiene '_' para extraer chunk: {file}")
+    *base_parts, chunk_part = name.split("_")
+    audio_id = "_".join(base_parts)
+    chunk_index = int(chunk_part)
     return audio_id, chunk_index
 
 def generar_csv_embeddings_test(input_dir, output_csv, chunk_size=3, num_threads=4):
